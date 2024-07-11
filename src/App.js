@@ -22,7 +22,6 @@ function App() {
     const bbox = turf.bbox(
       turf.polygon([[...boundaryPolygon, boundaryPolygon[0]]])
     );
-
     const [minLon, minLat, maxLon, maxLat] = bbox;
 
     let totalDistance = 0;
@@ -34,7 +33,11 @@ function App() {
     }
     const averageDistance = totalDistance / (boundaryPolygon.length - 1);
     let baseResolution = averageDistance / 2;
+    // while (baseResolution > 0 ){
+    //   baseResolution /= 2;
+    // }
 
+    console.log(averageDistance);
     let gridPoints = generateGrid(bbox, baseResolution);
     let insidePoints = gridPoints.filter((point) =>
       isPointInPolygon(point, boundaryPolygon)
@@ -54,65 +57,65 @@ function App() {
       );
     }
 
-    setGridPointsInside(insidePoints);
-    setGridPointsOutside(outsidePoints);
+    // setGridPointsInside(insidePoints);
+    // setGridPointsOutside(outsidePoints);
 
     async function fetchAndCalculateArea() {
-      const elevations = await fetchElevation(insidePoints, apiKey);
+      // const elevations = await fetchElevation(insidePoints, apiKey);
       const lon = insidePoints.map((p) => p[0]);
       const lat = insidePoints.map((p) => p[1]);
-      const area = calculateSurfaceArea(lon, lat, elevations);
-      setTotalArea(area);
+      // const area = calculateSurfaceArea(lon, lat, elevations);
+      // setTotalArea(area);
     }
 
     fetchAndCalculateArea();
   }, [apiKey, boundaryPolygon]);
 
-  useEffect(() => {
-    const svg = d3.select("#map").attr("width", 800).attr("height", 600);
+  // useEffect(() => {
+  //   const svg = d3.select("#map").attr("width", 800).attr("height", 600);
 
-    const projection = d3
-      .geoMercator()
-      .center([
-        (boundaryLon[0] + boundaryLon[2]) / 2,
-        (boundaryLat[0] + boundaryLat[2]) / 2,
-      ])
-      .scale(10000)
-      .translate([400, 300]);
+  //   const projection = d3
+  //     .geoMercator()
+  //     .center([
+  //       (boundaryLon[0] + boundaryLon[2]) / 2,
+  //       (boundaryLat[0] + boundaryLat[2]) / 2,
+  //     ])
+  //     .scale(10000)
+  //     .translate([400, 300]);
 
-    const path = d3.geoPath().projection(projection);
+  //   const path = d3.geoPath().projection(projection);
 
-    svg
-      .append("path")
-      .datum(turf.polygon([[...boundaryPolygon, boundaryPolygon[0]]]))
-      .attr("d", path)
-      .attr("class", "boundary")
-      .style("stroke", "black")
-      .style("stroke-width", 2)
-      .style("fill", "none");
+  //   svg
+  //     .append("path")
+  //     .datum(turf.polygon([[...boundaryPolygon, boundaryPolygon[0]]]))
+  //     .attr("d", path)
+  //     .attr("class", "boundary")
+  //     .style("stroke", "black")
+  //     .style("stroke-width", 2)
+  //     .style("fill", "none");
 
-    svg
-      .selectAll(".inside")
-      .data(gridPointsInside.map((point) => turf.point(point)))
-      .enter()
-      .append("circle")
-      .attr("class", "inside")
-      .attr("cx", (d) => projection(d.geometry.coordinates)[0])
-      .attr("cy", (d) => projection(d.geometry.coordinates)[1])
-      .attr("r", 2)
-      .style("fill", "green");
+  //   svg
+  //     .selectAll(".inside")
+  //     .data(gridPointsInside.map((point) => turf.point(point)))
+  //     .enter()
+  //     .append("circle")
+  //     .attr("class", "inside")
+  //     .attr("cx", (d) => projection(d.geometry.coordinates)[0])
+  //     .attr("cy", (d) => projection(d.geometry.coordinates)[1])
+  //     .attr("r", 2)
+  //     .style("fill", "green");
 
-    svg
-      .selectAll(".outside")
-      .data(gridPointsOutside.map((point) => turf.point(point)))
-      .enter()
-      .append("circle")
-      .attr("class", "outside")
-      .attr("cx", (d) => projection(d.geometry.coordinates)[0])
-      .attr("cy", (d) => projection(d.geometry.coordinates)[1])
-      .attr("r", 2)
-      .style("fill", "red");
-  }, [gridPointsInside, gridPointsOutside, boundaryPolygon]);
+  //   svg
+  //     .selectAll(".outside")
+  //     .data(gridPointsOutside.map((point) => turf.point(point)))
+  //     .enter()
+  //     .append("circle")
+  //     .attr("class", "outside")
+  //     .attr("cx", (d) => projection(d.geometry.coordinates)[0])
+  //     .attr("cy", (d) => projection(d.geometry.coordinates)[1])
+  //     .attr("r", 2)
+  //     .style("fill", "red");
+  // }, [gridPointsInside, gridPointsOutside, boundaryPolygon]);
 
   return (
     <div className="App">
