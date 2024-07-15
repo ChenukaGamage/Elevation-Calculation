@@ -8,122 +8,79 @@ import { isPointInPolygon } from "./utils/isPointInPolygon";
 import { calculateSurfaceArea } from "./utils/calculateSurfaceArea";
 
 function App() {
-  const [gridPointsInside, setGridPointsInside] = useState([]);
-  const [gridPointsOutside, setGridPointsOutside] = useState([]);
   const [totalArea, setTotalArea] = useState(null);
 
-  const boundaryLat = [7.006938, 7.257183, 7.219517, 7.079452, 7.057741];
-  const boundaryLon = [80.132599, 80.281552, 80.756713, 80.752374, 80.451872];
+  const boundaryLat = [
+    37.419660834181826, 37.41983897419518, 37.41929470053686,
+    37.419294700536843,
+  ];
+  const boundaryLon = [
+    -122.08463788032533, -122.08439011126758, -122.0843904465437,
+    -122.0843904465454,
+  ];
   const boundaryPolygon = boundaryLon.map((lon, i) => [lon, boundaryLat[i]]);
 
-  const apiKey = "AIzaSyD4TgCq6fHybwf9Ar4t2pi0tE7l6PDN7pg"; // Replace with your actual API key
+  const apiKey = "AIzaSyAvDuUmTTwxFnWEE5XGXxjbGVR0DGGIxkU"; // Replace with your actual API key
 
   useEffect(() => {
-    const bbox = turf.bbox(
-      turf.polygon([[...boundaryPolygon, boundaryPolygon[0]]])
-    );
-    const [minLon, minLat, maxLon, maxLat] = bbox;
-
-    let totalDistance = 0;
-    for (let i = 0; i < boundaryPolygon.length - 1; i++) {
-      totalDistance += turf.distance(
-        turf.point(boundaryPolygon[i]),
-        turf.point(boundaryPolygon[i + 1])
-      );
-    }
-    const averageDistance = totalDistance / (boundaryPolygon.length - 1);
-    let baseResolution = averageDistance / 2;
-    // while (baseResolution > 0 ){
-    //   baseResolution /= 2;
-    // }
-
-    console.log(averageDistance);
-    let gridPoints = generateGrid(bbox, baseResolution);
-    let insidePoints = gridPoints.filter((point) =>
-      isPointInPolygon(point, boundaryPolygon)
-    );
-    let outsidePoints = gridPoints.filter(
-      (point) => !isPointInPolygon(point, boundaryPolygon)
-    );
-
-    if (insidePoints.length < 8) {
-      baseResolution = baseResolution / 4;
-      gridPoints = generateGrid(bbox, baseResolution);
-      insidePoints = gridPoints.filter((point) =>
-        isPointInPolygon(point, boundaryPolygon)
-      );
-      outsidePoints = gridPoints.filter(
-        (point) => !isPointInPolygon(point, boundaryPolygon)
-      );
-    }
-
-    // setGridPointsInside(insidePoints);
-    // setGridPointsOutside(outsidePoints);
-
+    console.log(boundaryPolygon);
     async function fetchAndCalculateArea() {
-      // const elevations = await fetchElevation(insidePoints, apiKey);
-      const lon = insidePoints.map((p) => p[0]);
-      const lat = insidePoints.map((p) => p[1]);
-      // const area = calculateSurfaceArea(lon, lat, elevations);
-      // setTotalArea(area);
+      // const elevations =  fetchElevation(boundaryPolygon, apiKey);
+      const elevations = [
+        4.135900974273682, 4.195455074310303, 4.487160205841064,
+        4.48716020584108,
+      ];
+      const lon = boundaryPolygon.map((p) => p[0]);
+      const lat = boundaryPolygon.map((p) => p[1]);
+      const area = calculateSurfaceArea(lon, lat, elevations);
+      setTotalArea(area);
     }
 
     fetchAndCalculateArea();
   }, [apiKey, boundaryPolygon]);
 
-  // useEffect(() => {
-  //   const svg = d3.select("#map").attr("width", 800).attr("height", 600);
-
-  //   const projection = d3
-  //     .geoMercator()
-  //     .center([
-  //       (boundaryLon[0] + boundaryLon[2]) / 2,
-  //       (boundaryLat[0] + boundaryLat[2]) / 2,
-  //     ])
-  //     .scale(10000)
-  //     .translate([400, 300]);
-
-  //   const path = d3.geoPath().projection(projection);
-
-  //   svg
-  //     .append("path")
-  //     .datum(turf.polygon([[...boundaryPolygon, boundaryPolygon[0]]]))
-  //     .attr("d", path)
-  //     .attr("class", "boundary")
-  //     .style("stroke", "black")
-  //     .style("stroke-width", 2)
-  //     .style("fill", "none");
-
-  //   svg
-  //     .selectAll(".inside")
-  //     .data(gridPointsInside.map((point) => turf.point(point)))
-  //     .enter()
-  //     .append("circle")
-  //     .attr("class", "inside")
-  //     .attr("cx", (d) => projection(d.geometry.coordinates)[0])
-  //     .attr("cy", (d) => projection(d.geometry.coordinates)[1])
-  //     .attr("r", 2)
-  //     .style("fill", "green");
-
-  //   svg
-  //     .selectAll(".outside")
-  //     .data(gridPointsOutside.map((point) => turf.point(point)))
-  //     .enter()
-  //     .append("circle")
-  //     .attr("class", "outside")
-  //     .attr("cx", (d) => projection(d.geometry.coordinates)[0])
-  //     .attr("cy", (d) => projection(d.geometry.coordinates)[1])
-  //     .attr("r", 2)
-  //     .style("fill", "red");
-  // }, [gridPointsInside, gridPointsOutside, boundaryPolygon]);
-
   return (
     <div className="App">
       <h1>Boundary Grid and Surface Area</h1>
       <svg id="map"></svg>
-      {totalArea && <p>Total Surface Area: {totalArea} square meters</p>}
+      {totalArea && (
+        <p>Total Surface Area: {totalArea / 25.29285264} perches</p>
+      )}
     </div>
   );
 }
-
 export default App;
+
+// function App() {
+//   const lat = [
+//     37.419660834181826, 37.41983897419518, 37.41929470053686, 37.419294700536843];
+//   const lon = [
+//     -122.08463788032533, -122.08439011126758, -122.0843904465437,
+//     -122.0843904465454];
+//     // fetchElevation();
+// // const lat = [
+// //   6.271011180086728, 6.270787555901456, 6.26990938846365, 6.269669433536478,
+// //   6.270147010386878,
+// // ];
+
+// // const lon = [
+// //   80.06681475788355, 80.06618712097406, 80.06601747125387, 80.06677586585283,
+// //   80.06720367819071,
+// // ];
+
+//   const elev = [
+//     4.135900974273682, 4.195455074310303, 4.487160205841064, 4.487160205841080];
+
+//   const totArea = calculateSurfaceArea(lon, lat, elev);
+
+//   return (
+//     <div className="App">
+//       <h1>Boundary Grid and Surface Area</h1>
+//       {totArea && (
+//         <p>Total Surface Area: {totArea / 25.29285264} perches </p>
+//       )}
+//     </div>
+//   );
+// }
+
+// export default App;

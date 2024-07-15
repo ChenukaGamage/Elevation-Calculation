@@ -1,6 +1,10 @@
 import * as d3 from "d3";
 import { degToRad } from "./degToRad";
 import { triangleArea } from "./triangleArea";
+const lat = 7.006938;
+const lon = 80.132599;
+const elev = 2.090;
+
 
 export function calculateSurfaceArea(lon, lat, elev) {
   const a = 6378137.0; // Semi-major axis (meters)
